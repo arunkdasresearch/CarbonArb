@@ -82,7 +82,21 @@ def calculate_cost_and_benefit(social_cost_of_carbon, global_lcoe_average, beta,
 ###############################################################################
 
 def main():
-    st.title("My Carbon Arbitrage Opportunity Calculator")
+    st.title("Carbon Arbitrage Opportunity Calculator")
+
+    # Display full research background and acknowledgments
+    st.markdown(
+        "<p style='font-size:16px; color:gray;'>"
+        "This app, <i>My Carbon Arbitrage Opportunity Calculator</i>, is based on the research paper "
+        "<a href='https://www.imf.org/en/Publications/WP/Issues/2022/05/31/The-Great-Carbon-Arbitrage-518464' target='_blank'>"
+        "<i>The Great Carbon Arbitrage</i></a> by Tobias Adrian (IMF), Patrick Bolton (Columbia & Imperial), "
+        "and Alissa M. Kleinnijenhuis (Cornell & Imperial). Their work quantifies the financial and environmental benefits "
+        "of reallocating capital to cost-effective decarbonization projects.</p>"
+        "<p style='font-size:16px; color:gray;'>"
+        "The tool integrates their models on carbon pricing, the Social Cost of Carbon (SCC), and Levelized Cost of Energy (LCOE) "
+        "to help policymakers and investors evaluate emissions reductions, costs, and net benefits.</p>",
+        unsafe_allow_html=True
+    )
 
     st.sidebar.header("Model Parameters")
     social_cost_of_carbon = st.sidebar.slider("Social Cost of Carbon (USD per ton CO₂)", 1, 200, 80)
@@ -107,13 +121,8 @@ def main():
     param_choice = st.selectbox("Which parameter would you like to sweep?",
                                 ["Social Cost of Carbon", "Global LCOE", "Beta"])
 
-    if param_choice == "Social Cost of Carbon":
-        param_values = np.linspace(10, 200, 20)
-    elif param_choice == "Global LCOE":
-        param_values = np.linspace(10, 200, 20)
-    else:
-        param_values = np.linspace(0.0, 2.0, 20)
-
+    param_values = np.linspace(10, 200, 20) if param_choice in ["Social Cost of Carbon", "Global LCOE"] else np.linspace(0.0, 2.0, 20)
+    
     emissions, cost, benefit, arbitrage = [], [], [], []
     for val in param_values:
         res = calculate_cost_and_benefit(
@@ -127,7 +136,7 @@ def main():
         benefit.append(res["benefit"])
         arbitrage.append(res["arbitrage"])
 
-    st.write("### 📊 Sweeping **{}**".format(param_choice))
+    st.write(f"### 📊 Sweeping **{param_choice}**")
 
     fig, axs = plt.subplots(2, 2, figsize=(12, 8))
 
@@ -145,7 +154,7 @@ def main():
     axs[1, 0].set_title("Benefit (trillion $)")
     axs[1, 0].set_xlabel(param_choice)
     axs[1, 0].set_ylabel("Trillion USD")
- 
+
     axs[1, 1].plot(param_values, arbitrage, label="Carbon Arbitrage", color="purple")
     axs[1, 1].set_title("Carbon Arbitrage (trillion $)")
     axs[1, 1].set_xlabel(param_choice)
