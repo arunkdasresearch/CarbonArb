@@ -82,9 +82,9 @@ def calculate_cost_and_benefit(social_cost_of_carbon, global_lcoe_average, beta,
 ###############################################################################
 
 def main():
-    st.title("Carbon Arbitrage Opportunity Calculator")
+    st.title("The Carbon Arbitrage Opportunity Calculator")
 
-    # Display full research background and acknowledgments
+    # Full research background and acknowledgments
     st.markdown(
         "<p style='font-size:16px; color:gray;'>"
         "This app, <i>My Carbon Arbitrage Opportunity Calculator</i>, is based on the research paper "
@@ -117,6 +117,9 @@ def main():
     st.write(f"**Benefit**: {results['benefit']:.2f} trillion dollars")
     st.write(f"**Carbon arbitrage opportunity**: {results['arbitrage']:.2f} trillion dollars")
 
+    # ------------------
+    # Parameter Sweep Plots
+    # ------------------
     st.subheader("Parameter Sweep Plots")
     param_choice = st.selectbox("Which parameter would you like to sweep?",
                                 ["Social Cost of Carbon", "Global LCOE", "Beta"])
@@ -136,32 +139,21 @@ def main():
         benefit.append(res["benefit"])
         arbitrage.append(res["arbitrage"])
 
-    st.write(f"### 📊 Sweeping **{param_choice}**")
+    df_plot = pd.DataFrame({
+        "Parameter": param_values,
+        "Emissions (GtCO2)": emissions,
+        "Cost (trillion $)": cost,
+        "Benefit (trillion $)": benefit,
+        "Arbitrage (trillion $)": arbitrage
+    }).set_index("Parameter")
 
-    fig, axs = plt.subplots(2, 2, figsize=(12, 8))
+    # Display the graphs
+    st.line_chart(df_plot)
 
-    axs[0, 0].plot(param_values, emissions, label="Total Emissions Prevented", color="blue")
-    axs[0, 0].set_title("Total Emissions Prevented (GtCO2)")
-    axs[0, 0].set_xlabel(param_choice)
-    axs[0, 0].set_ylabel("GtCO₂")
-
-    axs[0, 1].plot(param_values, cost, label="Cost", color="red")
-    axs[0, 1].set_title("Cost (trillion $)")
-    axs[0, 1].set_xlabel(param_choice)
-    axs[0, 1].set_ylabel("Trillion USD")
-
-    axs[1, 0].plot(param_values, benefit, label="Benefit", color="green")
-    axs[1, 0].set_title("Benefit (trillion $)")
-    axs[1, 0].set_xlabel(param_choice)
-    axs[1, 0].set_ylabel("Trillion USD")
-
-    axs[1, 1].plot(param_values, arbitrage, label="Carbon Arbitrage", color="purple")
-    axs[1, 1].set_title("Carbon Arbitrage (trillion $)")
-    axs[1, 1].set_xlabel(param_choice)
-    axs[1, 1].set_ylabel("Trillion USD")
-
-    plt.tight_layout()
-    st.pyplot(fig)
+    st.markdown(
+        "**Interpretation**: Each line shows how the result changes when varying the selected parameter "
+        "while holding the other two fixed."
+    )
 
 if __name__ == "__main__":
     main()
